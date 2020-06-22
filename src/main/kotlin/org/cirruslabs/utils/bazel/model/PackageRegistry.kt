@@ -5,6 +5,9 @@ import java.util.concurrent.ConcurrentHashMap
 class PackageRegistry {
   private val mapping: MutableMap<String, PackageInfo> = ConcurrentHashMap()
 
+  val packages: Set<PackageInfo>
+    get() = mapping.values.toSet()
+
   fun findInfo(fqn: String): PackageInfo? = mapping[fqn]
 
   fun addPackage(packageInfo: PackageInfo) {

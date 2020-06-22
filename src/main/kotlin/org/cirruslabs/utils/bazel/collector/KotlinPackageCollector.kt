@@ -1,7 +1,7 @@
 package org.cirruslabs.utils.bazel.collector
 
 import kotlinx.coroutines.withContext
-import org.cirruslabs.utils.bazel.model.PackageInfo
+import org.cirruslabs.utils.bazel.model.KotlinPackageInfo
 import org.cirruslabs.utils.bazel.model.PackageRegistry
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
@@ -17,6 +17,7 @@ import org.jetbrains.kotlin.psi.KtFile
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardOpenOption
 
 class KotlinPackageCollector(
   private val workspaceRoot: Path,
@@ -55,10 +56,9 @@ class KotlinPackageCollector(
 
       val relativePackagePath = VfsUtilCore.getRelativePath(packageFolders.first(), workspaceRootFile, File.separatorChar)
         ?: continue
-      val packageInfo = PackageInfo(
+      val packageInfo = KotlinPackageInfo(
         fullyQualifiedName = fqn,
-        targetPath = relativePackagePath,
-        targetName = "generated"
+        targetPath = relativePackagePath
       )
       packageInfo.addDirectPackageDependencies(collectDirectPackageDependencies(files))
       registry.addPackage(packageInfo)
@@ -78,7 +78,18 @@ class KotlinPackageCollector(
     result
   }
 
-  fun generateBuildFiles(registry: PackageRegistry) {
-    TODO("Not yet implemented")
+  suspend fun generateBuildFiles(registry: PackageRegistry) = withContext(Dispatchers.IO) {
+    registry.packages.forEach { packageInfo ->
+      val buildFilePath = workspaceRoot.resolve(packageInfo.targetPath).resolve("BUILD.bazel")
+      if (!Files.deleteIfExists(buildFilePath)) {
+        System.err.println("Failed to delete $buildFilePath")
+      } else {
+        Files.writeString(
+          buildFilePath,
+          packageInfo.generateBuildFile(registry),
+          StandardOpenOption.CREATE_NEW
+        )
+      }
+    }
   }
 }
