@@ -1,8 +1,8 @@
 package org.cirruslabs.utils.bazel.collector
 
 import kotlinx.coroutines.withContext
-import org.cirruslabs.utils.bazel.model.KotlinPackageInfo
-import org.cirruslabs.utils.bazel.model.PackageRegistry
+import org.cirruslabs.utils.bazel.model.kotlin.KotlinPackageInfo
+import org.cirruslabs.utils.bazel.model.base.PackageRegistry
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
 import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector
@@ -61,7 +61,7 @@ class KotlinPackageCollector(
         targetPath = relativePackagePath
       )
       packageInfo.addDirectPackageDependencies(collectDirectPackageDependencies(files))
-      registry.addPackage(packageInfo)
+      registry.addTarget(packageInfo.fullyQualifiedName, packageInfo)
     }
   }
 
@@ -79,7 +79,7 @@ class KotlinPackageCollector(
   }
 
   suspend fun generateBuildFiles(registry: PackageRegistry) = withContext(Dispatchers.IO) {
-    registry.packages.forEach { packageInfo ->
+    registry.packages.mapNotNull { it as? KotlinPackageInfo }.forEach { packageInfo ->
       val buildFilePath = workspaceRoot.resolve(packageInfo.targetPath).resolve("BUILD.bazel")
       if (!Files.deleteIfExists(buildFilePath)) {
         System.err.println("Failed to delete $buildFilePath")

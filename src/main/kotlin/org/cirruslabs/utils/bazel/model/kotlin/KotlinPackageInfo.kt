@@ -1,4 +1,7 @@
-package org.cirruslabs.utils.bazel.model
+package org.cirruslabs.utils.bazel.model.kotlin
+
+import org.cirruslabs.utils.bazel.model.base.PackageInfo
+import org.cirruslabs.utils.bazel.model.base.PackageRegistry
 
 class KotlinPackageInfo(
   fullyQualifiedName: String,
