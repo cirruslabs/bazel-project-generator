@@ -8,9 +8,11 @@ class KotlinPackageInfo(
   targetPath: String
 ) : PackageInfo(fullyQualifiedName, targetPath, "kt") {
   override fun generateBuildFile(packageRegistry: PackageRegistry): String {
-    val deps = directPackageDependencies.mapNotNull {
-      packageRegistry.findInfo(it)?.fullTargetLocation
-    }.sorted().joinToString(separator = "\n") { "\"$it\"," }
+    val deps = directPackageDependencies
+      .map { packageRegistry.findInfo(it) }
+      .flatten()
+      .map { it.fullTargetLocation }
+      .toSortedSet().joinToString(separator = "\n") { "\"$it\"," }
     return """# GENERATED
 load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_library")
 

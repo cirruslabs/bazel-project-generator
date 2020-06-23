@@ -1,8 +1,8 @@
 package org.cirruslabs.utils.bazel.collector
 
 import kotlinx.coroutines.withContext
-import org.cirruslabs.utils.bazel.model.kotlin.KotlinPackageInfo
 import org.cirruslabs.utils.bazel.model.base.PackageRegistry
+import org.cirruslabs.utils.bazel.model.kotlin.KotlinTestPackageInfo
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.messages.MessageRenderer
 import org.jetbrains.kotlin.cli.common.messages.PrintingMessageCollector
@@ -14,12 +14,12 @@ import org.jetbrains.kotlin.kotlinx.coroutines.Dispatchers
 import org.jetbrains.kotlin.psi.KtFile
 import java.nio.file.Path
 
-class KotlinPackageCollector(
+class KotlinTestPackageCollector(
   workspaceRoot: Path,
   environment: KotlinCoreEnvironment
-): AbstractKotlinPackageCollector<KotlinPackageInfo>(workspaceRoot, environment) {
+) : AbstractKotlinPackageCollector<KotlinTestPackageInfo>(workspaceRoot, environment) {
   companion object {
-    suspend fun create(workspaceRoot: Path): KotlinPackageCollector = withContext(Dispatchers.IO) {
+    suspend fun create(workspaceRoot: Path): KotlinTestPackageCollector = withContext(Dispatchers.IO) {
       val environment = KotlinCoreEnvironment.createForProduction(
         Disposer.newDisposable(),
         CompilerConfiguration().apply {
@@ -28,21 +28,25 @@ class KotlinPackageCollector(
         },
         EnvironmentConfigFiles.JVM_CONFIG_FILES
       )
-      KotlinPackageCollector(workspaceRoot, environment)
+      KotlinTestPackageCollector(workspaceRoot, environment)
     }
   }
 
   override val subRoot: String
-    get() = "main/kotlin"
+    get() = "test/kotlin"
 
-  override fun buildFilePath(packageInfo: KotlinPackageInfo): Path =
+  override fun buildFilePath(packageInfo: KotlinTestPackageInfo): Path =
     workspaceRoot.resolve(packageInfo.targetPath).resolve("BUILD.bazel")
 
-  override fun generateBuildFileContent(registry: PackageRegistry, packageInfo: KotlinPackageInfo): String =
+  override fun generateBuildFileContent(registry: PackageRegistry, packageInfo: KotlinTestPackageInfo): String =
     packageInfo.generateBuildFile(registry)
 
-  override fun generateTarget(fqn: String, relativePackagePath: String, directPackageDependencies: Set<String>, files: List<KtFile>): KotlinPackageInfo {
-    val packageInfo = KotlinPackageInfo(fullyQualifiedName = fqn, targetPath = relativePackagePath)
+  override fun generateTarget(fqn: String, relativePackagePath: String, directPackageDependencies: Set<String>, files: List<KtFile>): KotlinTestPackageInfo {
+    val packageInfo = KotlinTestPackageInfo(
+      fullyQualifiedName = fqn,
+      targetPath = relativePackagePath,
+      testNames = files.map { it.name.substringBeforeLast('.') }.filter { it.endsWith("Test") }
+    )
     packageInfo.addDirectPackageDependencies(directPackageDependencies)
     return packageInfo
   }
