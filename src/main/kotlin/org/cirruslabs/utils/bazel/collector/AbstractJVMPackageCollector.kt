@@ -63,11 +63,13 @@ abstract class AbstractJVMPackageCollector<T : BazelTarget>(
         packageFqName = line.substringAfter("package")
           .trimStart()
           .substringBefore(' ')
+          .removeSuffix(";")
       }
       if (line.startsWith("import")) {
         val importFq = line.substringAfter("import")
           .trimStart()
           .substringBefore(' ')
+          .removeSuffix(";")
         importedPackages.add(importFq.substringBeforeLast('.'))
       }
     }

@@ -7,6 +7,7 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.path
 import kotlinx.coroutines.runBlocking
 import org.cirruslabs.utils.bazel.collector.DependenciesCollector
+import org.cirruslabs.utils.bazel.collector.JavaPackageCollector
 import org.cirruslabs.utils.bazel.collector.KotlinPackageCollector
 import org.cirruslabs.utils.bazel.collector.KotlinTestPackageCollector
 import org.cirruslabs.utils.bazel.model.base.PackageRegistry
@@ -35,11 +36,14 @@ class App : CliktCommand() {
       else -> null
     }
     dependenciesCollector?.collectPackageInfos(registry)
+    dependenciesCollector?.generateWorkspaceFile(workspaceRoot)
+
+    val javaPackageCollector = JavaPackageCollector(workspaceRoot.toAbsolutePath())
+    javaPackageCollector.collectPackageInfoInSourceRoot(registry, sourceContentRoot)
+    javaPackageCollector.generateBuildFiles(registry)
 
     val kotlinPackageCollector = KotlinPackageCollector(workspaceRoot.toAbsolutePath())
     kotlinPackageCollector.collectPackageInfoInSourceRoot(registry, sourceContentRoot)
-
-    dependenciesCollector?.generateWorkspaceFile(workspaceRoot)
     kotlinPackageCollector.generateBuildFiles(registry)
 
     val kotlinTestPackageCollector = KotlinTestPackageCollector(workspaceRoot.toAbsolutePath())

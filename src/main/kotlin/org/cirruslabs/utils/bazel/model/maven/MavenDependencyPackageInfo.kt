@@ -7,5 +7,7 @@ class MavenDependencyPackageInfo(
   private val library: LibraryDefinition
 ) : BazelTarget {
   override val fullTargetLocation: String
-    get() = "@maven//:${library.group}_${library.name}".replace('.', '_')
+    get() = "@maven//:${library.group}_${library.name}"
+      .replace('.', '_')
+      .replace('-', '_')
 }
