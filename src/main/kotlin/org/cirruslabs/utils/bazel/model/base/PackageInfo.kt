@@ -6,7 +6,7 @@ abstract class PackageInfo(
   val fullyQualifiedName: String,
   val targetPath: String,
   val targetName: String
-): BazelTarget {
+) : BazelTarget {
   protected val directPackageDependencies: MutableSet<String> = TreeSet<String>()
 
   override val fullTargetLocation: String

@@ -6,9 +6,7 @@ import com.github.ajalt.clikt.parameters.options.multiple
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.path
 import kotlinx.coroutines.runBlocking
-import org.cirruslabs.utils.bazel.collector.DependenciesCollector
-import org.cirruslabs.utils.bazel.collector.KotlinPackageCollector
-import org.cirruslabs.utils.bazel.collector.KotlinTestPackageCollector
+import org.cirruslabs.utils.bazel.collector.*
 import org.cirruslabs.utils.bazel.model.base.PackageRegistry
 import java.nio.file.Files
 import java.nio.file.Path
@@ -29,19 +27,28 @@ class App : CliktCommand() {
   override fun run() = runBlocking {
     val registry = PackageRegistry()
     val dependenciesCollector = when {
-     dependencies != null -> DependenciesCollector.create(dependencies ?: workspaceRoot.resolve("dependencies_jvm.json"))
-     Files.exists(workspaceRoot.resolve("dependencies_jvm.json")) -> DependenciesCollector.create(workspaceRoot.resolve("dependencies_jvm.json"))
-     else -> null
+      dependencies != null -> DependenciesCollector.create(dependencies
+        ?: workspaceRoot.resolve("dependencies_jvm.json"))
+      Files.exists(workspaceRoot.resolve("dependencies_jvm.json")) -> DependenciesCollector.create(workspaceRoot.resolve("dependencies_jvm.json"))
+      else -> null
     }
     dependenciesCollector?.collectPackageInfos(registry)
-
-    val kotlinPackageCollector = KotlinPackageCollector.create(workspaceRoot.toAbsolutePath())
-    kotlinPackageCollector.collectPackageInfoInSourceRoot(registry, sourceContentRoot)
-
     dependenciesCollector?.generateWorkspaceFile(workspaceRoot)
+
+    val javaPackageCollector = JavaPackageCollector(workspaceRoot.toAbsolutePath())
+    javaPackageCollector.collectPackageInfoInSourceRoot(registry, sourceContentRoot)
+    javaPackageCollector.generateBuildFiles(registry)
+
+    val registryForJavaTests = registry.copy()
+    val javaTestPackageCollector = JavaTestPackageCollector(workspaceRoot.toAbsolutePath())
+    javaTestPackageCollector.collectPackageInfoInSourceRoot(registryForJavaTests, sourceContentRoot)
+    javaTestPackageCollector.generateBuildFiles(registryForJavaTests)
+
+    val kotlinPackageCollector = KotlinPackageCollector(workspaceRoot.toAbsolutePath())
+    kotlinPackageCollector.collectPackageInfoInSourceRoot(registry, sourceContentRoot)
     kotlinPackageCollector.generateBuildFiles(registry)
 
-    val kotlinTestPackageCollector = KotlinTestPackageCollector.create(workspaceRoot.toAbsolutePath())
+    val kotlinTestPackageCollector = KotlinTestPackageCollector(workspaceRoot.toAbsolutePath())
     kotlinTestPackageCollector.collectPackageInfoInSourceRoot(registry, sourceContentRoot)
     kotlinTestPackageCollector.generateBuildFiles(registry)
   }
