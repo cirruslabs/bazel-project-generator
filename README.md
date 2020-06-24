@@ -1,1 +1,1 @@
-# bazel-project-generator
+# WIP Bazel BUILD files generator for Kotlin
