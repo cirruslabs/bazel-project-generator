@@ -29,19 +29,20 @@ class App : CliktCommand() {
   override fun run() = runBlocking {
     val registry = PackageRegistry()
     val dependenciesCollector = when {
-     dependencies != null -> DependenciesCollector.create(dependencies ?: workspaceRoot.resolve("dependencies_jvm.json"))
-     Files.exists(workspaceRoot.resolve("dependencies_jvm.json")) -> DependenciesCollector.create(workspaceRoot.resolve("dependencies_jvm.json"))
-     else -> null
+      dependencies != null -> DependenciesCollector.create(dependencies
+        ?: workspaceRoot.resolve("dependencies_jvm.json"))
+      Files.exists(workspaceRoot.resolve("dependencies_jvm.json")) -> DependenciesCollector.create(workspaceRoot.resolve("dependencies_jvm.json"))
+      else -> null
     }
     dependenciesCollector?.collectPackageInfos(registry)
 
-    val kotlinPackageCollector = KotlinPackageCollector.create(workspaceRoot.toAbsolutePath())
+    val kotlinPackageCollector = KotlinPackageCollector(workspaceRoot.toAbsolutePath())
     kotlinPackageCollector.collectPackageInfoInSourceRoot(registry, sourceContentRoot)
 
     dependenciesCollector?.generateWorkspaceFile(workspaceRoot)
     kotlinPackageCollector.generateBuildFiles(registry)
 
-    val kotlinTestPackageCollector = KotlinTestPackageCollector.create(workspaceRoot.toAbsolutePath())
+    val kotlinTestPackageCollector = KotlinTestPackageCollector(workspaceRoot.toAbsolutePath())
     kotlinTestPackageCollector.collectPackageInfoInSourceRoot(registry, sourceContentRoot)
     kotlinTestPackageCollector.generateBuildFiles(registry)
   }

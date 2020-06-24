@@ -20,7 +20,7 @@ class PackageRegistry {
     return findInfo(parentFQN)
   }
 
-  fun addTarget(fqn:String, target: BazelTarget) {
+  fun addTarget(fqn: String, target: BazelTarget) {
     mapping.getOrPut(fqn) { ConcurrentLinkedQueue<BazelTarget>() }.add(target)
   }
 }

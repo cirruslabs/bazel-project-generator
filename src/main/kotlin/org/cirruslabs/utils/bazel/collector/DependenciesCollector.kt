@@ -1,11 +1,11 @@
 package org.cirruslabs.utils.bazel.collector
 
 import com.google.gson.Gson
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.cirruslabs.utils.bazel.model.DependenciesDefinition
 import org.cirruslabs.utils.bazel.model.base.PackageRegistry
 import org.cirruslabs.utils.bazel.model.maven.MavenDependencyPackageInfo
-import org.jetbrains.kotlin.kotlinx.coroutines.Dispatchers
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
@@ -20,6 +20,7 @@ class DependenciesCollector(private val deps: DependenciesDefinition) {
       DependenciesCollector(def)
     }
   }
+
   fun collectPackageInfos(registry: PackageRegistry) {
     deps.libraries.forEach { library ->
       val mavenPackageInfo = MavenDependencyPackageInfo(library)
