@@ -1,6 +1,8 @@
-.gradle
-build
-
-.run
 .idea
 *.iml
+lib
+out
+bazel-bazel-playground
+bazel-bin
+bazel-out
+bazel-testlogs
