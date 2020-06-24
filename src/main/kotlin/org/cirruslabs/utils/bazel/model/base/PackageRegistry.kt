@@ -14,8 +14,8 @@ class PackageRegistry(
     if (fqn.isBlank()) return emptyList()
     val parentFQN = fqn.substringBeforeLast('.', missingDelimiterValue = "")
     val packageInfo = mapping[fqn]
-    if (packageInfo != null) {
-      return packageInfo + findInfo(parentFQN)
+    if (packageInfo != null && packageInfo.isNotEmpty()) {
+      return packageInfo.toList()
     }
     return findInfo(parentFQN)
   }
