@@ -1,8 +1,6 @@
 package org.cirruslabs.utils.bazel.collector
 
 import com.google.gson.Gson
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.cirruslabs.utils.bazel.model.DependenciesDefinition
 import org.cirruslabs.utils.bazel.model.base.PackageRegistry
 import org.cirruslabs.utils.bazel.model.maven.MavenDependencyPackageInfo
@@ -11,15 +9,12 @@ import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
 class DependenciesCollector(private val deps: DependenciesDefinition) {
-  companion object {
-    suspend fun create(dependenciesFile: Path) = withContext(Dispatchers.IO) {
-      val def = Gson().fromJson(
-        Files.readString(dependenciesFile),
-        DependenciesDefinition::class.java
-      )
-      DependenciesCollector(def)
-    }
-  }
+  constructor(dependenciesFile: Path) : this(
+    Gson().fromJson(
+      Files.readString(dependenciesFile),
+      DependenciesDefinition::class.java
+    )
+  )
 
   fun collectPackageInfos(registry: PackageRegistry) {
     deps.libraries.forEach { library ->
@@ -40,6 +35,7 @@ class DependenciesCollector(private val deps: DependenciesDefinition) {
     if (Files.exists(workspaceFilePath) && !Files.deleteIfExists(workspaceFilePath)) {
       System.err.println("Failed to delete $workspaceFilePath")
     } else {
+      println("Generating $workspaceFilePath")
       Files.writeString(
         workspaceFilePath,
         workspaceFileContent(),

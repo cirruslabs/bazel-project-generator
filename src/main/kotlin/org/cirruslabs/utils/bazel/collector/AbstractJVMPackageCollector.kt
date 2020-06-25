@@ -1,12 +1,9 @@
 package org.cirruslabs.utils.bazel.collector
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.cirruslabs.utils.bazel.model.base.BazelTarget
 import org.cirruslabs.utils.bazel.model.base.PackageRegistry
 import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
-import java.util.*
 
 abstract class AbstractJVMPackageCollector<T : BazelTarget>(
   protected val workspaceRoot: Path
@@ -25,12 +22,12 @@ abstract class AbstractJVMPackageCollector<T : BazelTarget>(
   abstract fun generateBuildFileContent(registry: PackageRegistry, packageInfo: T): String
   abstract fun generateTarget(fqn: String, relativePackagePath: Path, directPackageDependencies: Set<String>, files: List<JvmFile>): T
 
-  suspend fun collectPackageInfoInSourceRoot(registry: PackageRegistry, sourceRoots: List<Path>) = withContext(Dispatchers.IO) {
+  fun collectPackageInfoInSourceRoot(registry: PackageRegistry, sourceRoots: List<Path>) {
     val allJvmFiles = sourceRoots
       .map { it.resolve(subRoot) }
       .filter { Files.exists(it) }
       .map {
-        val allJvmFiles: MutableList<JvmFile> = LinkedList()
+        val allJvmFiles: MutableList<JvmFile> = mutableListOf()
         Files.walkFileTree(it, object : SimpleFileVisitor<Path>() {
           override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
             if (!file.toString().endsWith(".$jvmFileExtension")) return FileVisitResult.CONTINUE
@@ -48,7 +45,9 @@ abstract class AbstractJVMPackageCollector<T : BazelTarget>(
         if (packageFolders.size > 1) {
           System.err.println("Package $packageFqName is declared in multiple folders: ${packageFolders}")
         }
-        val relativePackagePath = workspaceRoot.relativize(packageFolders.first())
+        val packagePath = packageFolders.first()
+        val relativePackagePath =
+          if (packagePath.isAbsolute) workspaceRoot.relativize(packagePath) else packagePath
         val directPackageDependencies = files.map { it.importedPackages }.flatten().toSortedSet()
         val packageInfo = generateTarget(packageFqName, relativePackagePath, directPackageDependencies, files)
         registry.addTarget(packageFqName, packageInfo)
@@ -76,7 +75,7 @@ abstract class AbstractJVMPackageCollector<T : BazelTarget>(
     return JvmFile(path, packageFqName, importedPackages)
   }
 
-  suspend fun generateBuildFiles(registry: PackageRegistry) = withContext(Dispatchers.IO) {
+  fun generateBuildFiles(registry: PackageRegistry) {
     for (packageInfo in registry.packages) {
       val buildFilePath = try {
         @Suppress("UNCHECKED_CAST")
@@ -87,6 +86,7 @@ abstract class AbstractJVMPackageCollector<T : BazelTarget>(
       if (Files.exists(buildFilePath) && !Files.deleteIfExists(buildFilePath)) {
         System.err.println("Failed to delete $buildFilePath")
       } else {
+        println("Generating $buildFilePath")
         Files.writeString(
           buildFilePath,
           generateBuildFileContent(registry, packageInfo),

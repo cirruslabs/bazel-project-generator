@@ -6,7 +6,6 @@ def jvm_dependencies():
     artifacts = [
       "com.github.ajalt:clikt:2.7.1",
       "com.google.code.gson:gson:2.8.6",
-      "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.7",
     ],
     repositories = [
       "https://maven-central.storage.googleapis.com/repos/central/data/",

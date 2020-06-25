@@ -9,6 +9,5 @@ kt_jvm_library(
     "//src/main/kotlin/org/cirruslabs/utils/bazel/collector:kt",
     "//src/main/kotlin/org/cirruslabs/utils/bazel/model/base:kt",
     "@maven//:com_github_ajalt_clikt",
-    "@maven//:org_jetbrains_kotlinx_kotlinx_coroutines_core",
   ],
 )

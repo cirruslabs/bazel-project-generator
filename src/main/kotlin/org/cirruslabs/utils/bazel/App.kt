@@ -5,7 +5,6 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.multiple
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.path
-import kotlinx.coroutines.runBlocking
 import org.cirruslabs.utils.bazel.collector.*
 import org.cirruslabs.utils.bazel.model.base.PackageRegistry
 import java.nio.file.Files
@@ -24,12 +23,13 @@ class App : CliktCommand() {
     .path(canBeFile = false, canBeDir = true)
     .multiple(required = false)
 
-  override fun run() = runBlocking {
+  override fun run() {
     val registry = PackageRegistry()
     val dependenciesCollector = when {
-      dependencies != null -> DependenciesCollector.create(dependencies
-        ?: workspaceRoot.resolve("dependencies_jvm.json"))
-      Files.exists(workspaceRoot.resolve("dependencies_jvm.json")) -> DependenciesCollector.create(workspaceRoot.resolve("dependencies_jvm.json"))
+      dependencies != null -> DependenciesCollector(
+        dependencies ?: workspaceRoot.resolve("dependencies_jvm.json")
+      )
+      Files.exists(workspaceRoot.resolve("dependencies_jvm.json")) -> DependenciesCollector(workspaceRoot.resolve("dependencies_jvm.json"))
       else -> null
     }
     dependenciesCollector?.collectPackageInfos(registry)
