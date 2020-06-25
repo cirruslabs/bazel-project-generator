@@ -9,9 +9,9 @@ http_archive(
     sha256 = RULES_KOTLIN_SHA,
 )
 
-load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kotlin_repositories", "kt_register_toolchains")
-kotlin_repositories() # if you want the default. Otherwise see custom kotlinc distribution below
-kt_register_toolchains() # to use the default toolchain, otherwise see toolchains below
+load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kotlin_repositories", "kt_register_toolchains", "define_kt_toolchain")
+kotlin_repositories()
+register_toolchains("//:kotlin_toolchain")
 
 RULES_JVM_EXTERNAL_TAG = "3.2"
 RULES_JVM_EXTERNAL_SHA = "82262ff4223c5fda6fb7ff8bd63db8131b51b413d26eb49e3131037e79e324af"
