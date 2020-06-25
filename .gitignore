@@ -2,7 +2,7 @@
 *.iml
 lib
 out
-bazel-bazel-playground
+bazel-bazel-project-generator
 bazel-bin
 bazel-out
 bazel-testlogs
