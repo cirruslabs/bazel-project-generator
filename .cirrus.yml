@@ -3,5 +3,6 @@ container:
 
 task:
   name: Tests 🤞
-  build_cmd_script: bazel build //:cmd_deploy.jar
+  build_script: bazel build //src/...
+  build_cmd_script: bazel build //:cmd //:cmd_deploy.jar
   test_projects_script: ./scripts/test-project-generation.sh
