@@ -1,0 +1,8 @@
+java_binary(
+  name = "cmd",
+  main_class = "org.cirruslabs.utils.bazel.AppKt",
+  runtime_deps = [
+    "@com_github_jetbrains_kotlin//:kotlin-reflect",
+    "//src/main/kotlin/org/cirruslabs/utils/bazel:kt"
+  ],
+)
