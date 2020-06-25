@@ -1,0 +1,8 @@
+container:
+  image: l.gcr.io/google/bazel:latest
+
+task:
+  name: Tests 🤞
+  test_script: bazel test //src/...
+  build_cmd_script: bazel build //:cmd_deploy.jar
+  test_projects_script: ./scripts/test-project-generation.sh
