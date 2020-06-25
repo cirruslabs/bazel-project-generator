@@ -9,7 +9,7 @@ http_archive(
     sha256 = RULES_KOTLIN_SHA,
 )
 
-load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kotlin_repositories", "kt_register_toolchains", "define_kt_toolchain")
+load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kotlin_repositories")
 kotlin_repositories()
 register_toolchains("//:kotlin_toolchain")
 
