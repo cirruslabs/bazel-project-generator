@@ -26,7 +26,7 @@ class DependenciesCollector(private val deps: DependenciesDefinition) {
   }
 
   fun generateWorkspaceFile(workspaceRoot: Path) {
-    val buildFilePath = workspaceRoot.resolve("3rdparty/jvm").resolve("BUILD")
+    val buildFilePath = workspaceRoot.resolve("3rdparty/jvm").resolve("BUILD.bazel")
     if (!Files.exists(buildFilePath)) {
       Files.createDirectories(buildFilePath.parent)
       Files.createFile(buildFilePath)
