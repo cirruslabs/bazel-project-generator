@@ -19,7 +19,7 @@ class App : CliktCommand() {
   private val dependencies: Path? by option(help = "JSON file with Maven dependencies")
     .path(canBeFile = true, canBeDir = false)
 
-  private val sourceContentRoot: List<Path> by option(help = "Source root to look for targets")
+  private val sourceContentRoot: List<Path> by option(help = "Source root to look for targets (can be relative to --workspace-root)")
     .path(canBeFile = false, canBeDir = true)
     .multiple(required = false)
 
