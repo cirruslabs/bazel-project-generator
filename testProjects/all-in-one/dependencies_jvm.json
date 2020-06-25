@@ -1,0 +1,33 @@
+{
+  "repositories": [
+    "https://maven-central.storage.googleapis.com/repos/central/data/",
+    "https://repo1.maven.org/maven2"
+  ],
+  "libraries": [
+    {
+      "group": "commons-lang",
+      "name": "commons-lang",
+      "version": "2.6",
+      "packagePrefixes": [
+        "org.apache.commons.lang"
+      ]
+    },
+    {
+      "group": "com.google.code.gson",
+      "name": "gson",
+      "version": "2.8.6",
+      "packagePrefixes": [
+        "com.google.gson"
+      ]
+    },
+    {
+      "group": "junit",
+      "name": "junit",
+      "version": "4.13",
+      "packagePrefixes": [
+        "org.junit",
+        "junit"
+      ]
+    }
+  ]
+}
