@@ -7,9 +7,8 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.path
 import org.cirruslabs.utils.bazel.collector.*
 import org.cirruslabs.utils.bazel.model.base.PackageRegistry
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
+import java.io.IOException
+import java.nio.file.*
 
 class App : CliktCommand() {
   private val workspaceRoot: Path by option(help = "Workspace root")
@@ -32,25 +31,44 @@ class App : CliktCommand() {
       Files.exists(workspaceRoot.resolve("dependencies_jvm.json")) -> DependenciesCollector(workspaceRoot.resolve("dependencies_jvm.json"))
       else -> null
     }
+
+    val roots =
+      if (sourceContentRoot.isEmpty()) {
+        findSourceRootsForGradleProject()
+      } else {
+        sourceContentRoot
+      }
+
     dependenciesCollector?.collectPackageInfos(registry)
     dependenciesCollector?.generateWorkspaceFile(workspaceRoot)
 
     val javaPackageCollector = JavaPackageCollector(workspaceRoot.toAbsolutePath())
-    javaPackageCollector.collectPackageInfoInSourceRoot(registry, sourceContentRoot)
+    javaPackageCollector.collectPackageInfoInSourceRoot(registry, roots)
     javaPackageCollector.generateBuildFiles(registry)
 
     val registryForJavaTests = registry.copy()
     val javaTestPackageCollector = JavaTestPackageCollector(workspaceRoot.toAbsolutePath())
-    javaTestPackageCollector.collectPackageInfoInSourceRoot(registryForJavaTests, sourceContentRoot)
+    javaTestPackageCollector.collectPackageInfoInSourceRoot(registryForJavaTests, roots)
     javaTestPackageCollector.generateBuildFiles(registryForJavaTests)
 
     val kotlinPackageCollector = KotlinPackageCollector(workspaceRoot.toAbsolutePath())
-    kotlinPackageCollector.collectPackageInfoInSourceRoot(registry, sourceContentRoot)
+    kotlinPackageCollector.collectPackageInfoInSourceRoot(registry, roots)
     kotlinPackageCollector.generateBuildFiles(registry)
 
     val kotlinTestPackageCollector = KotlinTestPackageCollector(workspaceRoot.toAbsolutePath())
-    kotlinTestPackageCollector.collectPackageInfoInSourceRoot(registry, sourceContentRoot)
+    kotlinTestPackageCollector.collectPackageInfoInSourceRoot(registry, roots)
     kotlinTestPackageCollector.generateBuildFiles(registry)
+  }
+
+  private fun findSourceRootsForGradleProject(): List<Path> {
+    val result = mutableListOf<Path>()
+    Files.walkFileTree(workspaceRoot, object : SimpleFileVisitor<Path>() {
+      override fun postVisitDirectory(dir: Path, exc: IOException?): FileVisitResult {
+        if (dir.endsWith("src")) result.add(dir)
+        return FileVisitResult.CONTINUE
+      }
+    })
+    return result
   }
 }
 
