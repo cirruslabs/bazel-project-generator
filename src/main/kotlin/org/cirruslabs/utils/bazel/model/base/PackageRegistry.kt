@@ -11,13 +11,19 @@ class PackageRegistry(
     get() = mapping.values.flatten().toSet()
 
   fun findInfo(fqn: String): List<BazelTarget> {
+    return findInfoImpl(fqn).also {
+      if (it.isEmpty()) System.err.println("Didn't find information about $fqn")
+    }
+  }
+
+  private fun findInfoImpl(fqn: String): List<BazelTarget> {
     if (fqn.isBlank()) return emptyList()
     val parentFQN = fqn.substringBeforeLast('.', missingDelimiterValue = "")
     val packageInfo = mapping[fqn]
     if (packageInfo != null && packageInfo.isNotEmpty()) {
       return packageInfo.toList()
     }
-    return findInfo(parentFQN)
+    return findInfoImpl(parentFQN)
   }
 
   fun addTarget(fqn: String, target: BazelTarget) {
