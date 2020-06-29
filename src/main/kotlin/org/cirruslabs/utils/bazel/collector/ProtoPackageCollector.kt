@@ -1,11 +1,12 @@
 package org.cirruslabs.utils.bazel.collector
 
 import org.cirruslabs.utils.bazel.model.base.PackageRegistry
+import org.cirruslabs.utils.bazel.model.proto.JavaProtoInfo
 import org.cirruslabs.utils.bazel.model.proto.KotlinProtoInfo
 import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
 
-class ProtoPackageCollector(private val workspaceRoot: Path) {
+class ProtoPackageCollector(private val workspaceRoot: Path, val implementationLanguage: String = "kotlin") {
   companion object {
     data class ProtoFile(
       val path: Path,
@@ -39,7 +40,14 @@ class ProtoPackageCollector(private val workspaceRoot: Path) {
         val packagePath = packageFolders.first()
         val relativePackagePath =
           if (packagePath.isAbsolute) workspaceRoot.relativize(packagePath) else packagePath
-        val packageInfo = KotlinProtoInfo(packageFqName, relativePackagePath.toString())
+        val packageInfo = when (implementationLanguage) {
+          "kotlin" -> KotlinProtoInfo(packageFqName, relativePackagePath.toString())
+          "java" -> JavaProtoInfo(packageFqName, relativePackagePath.toString())
+          else -> {
+            System.err.println("Can't recognize $implementationLanguage language for Protobufs. Defaulting to Kotlin")
+            KotlinProtoInfo(packageFqName, relativePackagePath.toString())
+          }
+        }
         registry.addTarget(packageFqName, packageInfo)
       }
   }

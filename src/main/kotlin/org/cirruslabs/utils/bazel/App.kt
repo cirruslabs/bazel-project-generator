@@ -26,6 +26,9 @@ class App : CliktCommand() {
   private val dryRun: Boolean by option(help = "Option to disable files generation")
     .flag(default = false)
 
+  private val protoTargetLanguage: String by option(help = "Either Kotlin or Java to use either grpc-kotlin or grpc-java only")
+    .default("Kotlin")
+
   override fun run() {
     val registry = PackageRegistry()
     val dependenciesCollector = when {
@@ -61,7 +64,7 @@ class App : CliktCommand() {
       javaTestPackageCollector.generateBuildFiles(registryForJavaTests)
     }
 
-    val protoPackageCollector = ProtoPackageCollector(workspaceRoot.toAbsolutePath())
+    val protoPackageCollector = ProtoPackageCollector(workspaceRoot.toAbsolutePath(), protoTargetLanguage.toLowerCase())
     protoPackageCollector.collectPackageInfoInSourceRoot(registry, roots)
     if (!dryRun) {
       protoPackageCollector.generateBuildFiles(registry)
