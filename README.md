@@ -10,6 +10,10 @@ First of all a `WORKSPACE` file need to be created to define `rules_jvm_external
 (you can take a look at [`WORKSPACE`](https://github.com/cirruslabs/bazel-project-generator/blob/master/WORKSPACE)
 file of this project).
 
+# Example Projects Using the Generator
+
+* [fkorotkov/microservices](https://github.com/fkorotkov/microservices) - GRPC Kotlin micro services in a monorepo
+
 ## External Maven Dependencies
 
 All external maven dependencies should be defined in `dependencies_jvm.json` file in the root of your repository.
