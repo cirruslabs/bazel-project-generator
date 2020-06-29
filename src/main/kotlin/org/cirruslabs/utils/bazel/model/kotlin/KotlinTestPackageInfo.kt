@@ -9,15 +9,17 @@ class KotlinTestPackageInfo(
   val testNames: List<String>
 ) : PackageInfo(fullyQualifiedName, targetPath, "tests") {
   override fun generateBuildFile(packageRegistry: PackageRegistry): String {
-    val deps = (directPackageDependencies + fullyQualifiedName)
+    val dependencyTargets = (directPackageDependencies + fullyQualifiedName)
       .map { packageRegistry.findInfo(it) }
-      .flatten().mapNotNull { pkg ->
-        when {
-          pkg is KotlinTestPackageInfo && pkg.fullyQualifiedName == this.fullyQualifiedName -> null
-          pkg is KotlinTestPackageInfo -> "//$targetPath:lib"
-          else -> pkg.fullTargetLocation
-        }
-      }.toSortedSet().joinToString(separator = "\n") { "\"$it\"," }
+      .flatten()
+    val dependencyPaths = dependencyTargets.mapNotNull { pkg ->
+      when {
+        pkg is KotlinTestPackageInfo && pkg.fullyQualifiedName.contentEquals(fullyQualifiedName) -> null
+        pkg is KotlinTestPackageInfo -> "//${pkg.targetPath}:lib"
+        else -> pkg.fullTargetLocation
+      }
+    }
+    val deps = dependencyPaths.toSortedSet().joinToString(separator = "\n") { "\"$it\"," }
     val result = StringBuilder()
     result.append("""# GENERATED
 load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_library", "kt_jvm_test")

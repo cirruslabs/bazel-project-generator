@@ -51,6 +51,10 @@ class App : CliktCommand() {
     javaTestPackageCollector.collectPackageInfoInSourceRoot(registryForJavaTests, roots)
     javaTestPackageCollector.generateBuildFiles(registryForJavaTests)
 
+    val protoPackageCollector = ProtoPackageCollector(workspaceRoot.toAbsolutePath())
+    protoPackageCollector.collectPackageInfoInSourceRoot(registry, roots)
+    protoPackageCollector.generateBuildFiles(registry)
+
     val kotlinPackageCollector = KotlinPackageCollector(workspaceRoot.toAbsolutePath())
     kotlinPackageCollector.collectPackageInfoInSourceRoot(registry, roots)
     kotlinPackageCollector.generateBuildFiles(registry)

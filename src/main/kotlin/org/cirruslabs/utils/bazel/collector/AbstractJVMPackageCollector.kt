@@ -72,7 +72,10 @@ abstract class AbstractJVMPackageCollector<T : BazelTarget>(
         importedPackages.add(importFq.substringBeforeLast('.'))
       }
     }
-    return JvmFile(path, packageFqName, importedPackages)
+    val importedPackagesFiltered = importedPackages
+      .filter { !it.startsWith("java.") }
+      .filter { !it.startsWith("kotlin.") }
+    return JvmFile(path, packageFqName, importedPackagesFiltered.toSortedSet())
   }
 
   fun generateBuildFiles(registry: PackageRegistry) {
@@ -87,9 +90,10 @@ abstract class AbstractJVMPackageCollector<T : BazelTarget>(
         System.err.println("Failed to delete $buildFilePath")
       } else {
         println("Generating $buildFilePath")
+        val buildFileContent = generateBuildFileContent(registry, packageInfo)
         Files.writeString(
           buildFilePath,
-          generateBuildFileContent(registry, packageInfo),
+          buildFileContent,
           StandardOpenOption.CREATE_NEW
         )
       }
