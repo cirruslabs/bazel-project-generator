@@ -2,6 +2,7 @@ package org.cirruslabs.utils.bazel
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.options.default
+import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.multiple
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.path
@@ -22,6 +23,9 @@ class App : CliktCommand() {
     .path(canBeFile = false, canBeDir = true)
     .multiple(required = false)
 
+  private val dryRun: Boolean by option(help = "Option to disable files generation")
+    .flag(default = false)
+
   override fun run() {
     val registry = PackageRegistry()
     val dependenciesCollector = when {
@@ -40,28 +44,40 @@ class App : CliktCommand() {
       }
 
     dependenciesCollector?.collectPackageInfos(registry)
-    dependenciesCollector?.generateWorkspaceFile(workspaceRoot)
+    if (!dryRun) {
+      dependenciesCollector?.generateWorkspaceFile(workspaceRoot)
+    }
 
     val javaPackageCollector = JavaPackageCollector(workspaceRoot.toAbsolutePath())
     javaPackageCollector.collectPackageInfoInSourceRoot(registry, roots)
-    javaPackageCollector.generateBuildFiles(registry)
+    if (!dryRun) {
+      javaPackageCollector.generateBuildFiles(registry)
+    }
 
     val registryForJavaTests = registry.copy()
     val javaTestPackageCollector = JavaTestPackageCollector(workspaceRoot.toAbsolutePath())
     javaTestPackageCollector.collectPackageInfoInSourceRoot(registryForJavaTests, roots)
-    javaTestPackageCollector.generateBuildFiles(registryForJavaTests)
+    if (!dryRun) {
+      javaTestPackageCollector.generateBuildFiles(registryForJavaTests)
+    }
 
     val protoPackageCollector = ProtoPackageCollector(workspaceRoot.toAbsolutePath())
     protoPackageCollector.collectPackageInfoInSourceRoot(registry, roots)
-    protoPackageCollector.generateBuildFiles(registry)
+    if (!dryRun) {
+      protoPackageCollector.generateBuildFiles(registry)
+    }
 
     val kotlinPackageCollector = KotlinPackageCollector(workspaceRoot.toAbsolutePath())
     kotlinPackageCollector.collectPackageInfoInSourceRoot(registry, roots)
-    kotlinPackageCollector.generateBuildFiles(registry)
+    if (!dryRun) {
+      kotlinPackageCollector.generateBuildFiles(registry)
+    }
 
     val kotlinTestPackageCollector = KotlinTestPackageCollector(workspaceRoot.toAbsolutePath())
     kotlinTestPackageCollector.collectPackageInfoInSourceRoot(registry, roots)
-    kotlinTestPackageCollector.generateBuildFiles(registry)
+    if (!dryRun) {
+      kotlinTestPackageCollector.generateBuildFiles(registry)
+    }
   }
 
   private fun findSourceRootsForGradleProject(): List<Path> {
