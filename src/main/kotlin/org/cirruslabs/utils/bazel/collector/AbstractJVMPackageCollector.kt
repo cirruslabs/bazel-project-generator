@@ -14,6 +14,18 @@ abstract class AbstractJVMPackageCollector<T : BazelTarget>(
       val packageFqName: String,
       val importedPackages: Set<String>
     )
+
+    private val defaultKotlinPackageImports = setOf(
+      "kotlin",
+      "kotlin.annotation",
+      "kotlin.collections",
+      "kotlin.comparisons",
+      "kotlin.io",
+      "kotlin.ranges",
+      "kotlin.sequences",
+      "kotlin.text",
+      "kotlin.test"
+    )
   }
 
   abstract val subRoot: String
@@ -74,7 +86,7 @@ abstract class AbstractJVMPackageCollector<T : BazelTarget>(
     }
     val importedPackagesFiltered = importedPackages
       .filter { !it.startsWith("java.") }
-      .filter { !it.startsWith("kotlin.") }
+      .filter { !defaultKotlinPackageImports.contains(it.substringBeforeLast('.')) }
     return JvmFile(path, packageFqName, importedPackagesFiltered.toSortedSet())
   }
 

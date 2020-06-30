@@ -1,6 +1,8 @@
 package org.cirruslabs.utils.bazel.collector
 
 import com.google.gson.Gson
+import io.ktor.util.KtorExperimentalAPI
+import org.cirruslabs.utils.bazel.fetcher.MavenInfoFetcher
 import org.cirruslabs.utils.bazel.model.DependenciesDefinition
 import org.cirruslabs.utils.bazel.model.base.PackageRegistry
 import org.cirruslabs.utils.bazel.model.maven.MavenDependencyPackageInfo
@@ -8,6 +10,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
+@KtorExperimentalAPI
 class DependenciesCollector(private val deps: DependenciesDefinition) {
   constructor(dependenciesFile: Path) : this(
     Gson().fromJson(
@@ -16,10 +19,18 @@ class DependenciesCollector(private val deps: DependenciesDefinition) {
     )
   )
 
-  fun collectPackageInfos(registry: PackageRegistry) {
+  private val infoFetcher = MavenInfoFetcher(deps.repositories)
+
+  suspend fun collectPackageInfos(registry: PackageRegistry) {
     deps.libraries.forEach { library ->
       val mavenPackageInfo = MavenDependencyPackageInfo(library)
-      library.packagePrefixes.forEach { prefix ->
+      val libraryPackages = infoFetcher.findPackagesInMavenArtifact(library.group, library.name, library.version)
+      if (libraryPackages.isEmpty()) {
+        System.err.println("Can't find packages for $library in defined Maven repositories!")
+      } else {
+        println("Found the following packages for $library: $libraryPackages")
+      }
+      libraryPackages.forEach { prefix ->
         registry.addTarget(prefix, mavenPackageInfo)
       }
     }
