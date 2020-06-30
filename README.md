@@ -36,17 +36,11 @@ jvm_dependencies()
     {
       "group": "com.google.code.gson",
       "name": "gson",
-      "version": "2.8.6",
-      "packagePrefixes": [
-        "com.google.gson"
-      ]
+      "version": "2.8.6"
     }
   ]
 }
 ```
-
-The only caveat is that you'll need to manually define `packagePrefixes` which a particular library contains. At some point
-Generator will [support `maven_install.json`](https://github.com/cirruslabs/bazel-project-generator/issues/5) directly.
 
 ## BUILD files generation
 
