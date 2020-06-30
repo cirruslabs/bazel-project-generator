@@ -1,0 +1,23 @@
+# GENERATED
+load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kt_jvm_library", "kt_jvm_test")
+
+kt_jvm_library(
+  name = "lib",
+  srcs = glob(["*.kt"]),
+  visibility = ["//visibility:public"],
+  deps = [
+    "@com_github_jetbrains_kotlin//:kotlin-test",
+    "//src/main/kotlin/org/cirruslabs/utils/bazel/fetcher:kt",
+    "@maven//:io_ktor_ktor_utils",
+    "@maven//:junit_junit",
+    "@maven//:org_jetbrains_kotlinx_kotlinx_coroutines_core",
+  ],
+)
+
+kt_jvm_test(
+  name = "MavenInfoFetcherTest",
+  srcs = ["MavenInfoFetcherTest.kt"],
+  test_class = "org.cirruslabs.utils.bazel.fetcher.MavenInfoFetcherTest",
+  visibility = ["//visibility:public"],
+  deps = [ ":lib" ],
+)

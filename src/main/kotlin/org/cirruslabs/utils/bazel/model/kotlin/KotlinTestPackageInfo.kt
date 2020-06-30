@@ -29,6 +29,7 @@ kt_jvm_library(
   srcs = glob(["*.kt"]),
   visibility = ["//visibility:public"],
   deps = [
+    "@com_github_jetbrains_kotlin//:kotlin-test",
 ${deps.prependIndent("    ")}
   ],
 )

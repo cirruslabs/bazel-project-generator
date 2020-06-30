@@ -6,11 +6,14 @@ import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.multiple
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.path
+import io.ktor.util.KtorExperimentalAPI
+import kotlinx.coroutines.runBlocking
 import org.cirruslabs.utils.bazel.collector.*
 import org.cirruslabs.utils.bazel.model.base.PackageRegistry
 import java.io.IOException
 import java.nio.file.*
 
+@KtorExperimentalAPI
 class App : CliktCommand() {
   private val workspaceRoot: Path by option(help = "Workspace root")
     .path(canBeFile = false, canBeDir = true)
@@ -29,13 +32,14 @@ class App : CliktCommand() {
   private val protoTargetLanguage: String by option(help = "Either Kotlin or Java to use either grpc-kotlin or grpc-java only")
     .default("Kotlin")
 
-  override fun run() {
+  override fun run() = runBlocking {
     val registry = PackageRegistry()
     val dependenciesCollector = when {
       dependencies != null -> DependenciesCollector(
         dependencies ?: workspaceRoot.resolve("dependencies_jvm.json")
       )
       Files.exists(workspaceRoot.resolve("dependencies_jvm.json")) -> DependenciesCollector(workspaceRoot.resolve("dependencies_jvm.json"))
+      Files.exists(workspaceRoot.resolve("dependencies.json")) -> DependenciesCollector(workspaceRoot.resolve("dependencies.json"))
       else -> null
     }
 
