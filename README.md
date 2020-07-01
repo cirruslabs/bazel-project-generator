@@ -1,5 +1,7 @@
 # Bazel BUILD files generator for JVM with package-level granularity
 
+[![Build Status](https://api.cirrus-ci.com/github/cirruslabs/bazel-project-generator.svg)](https://cirrus-ci.com/github/cirruslabs/bazel-project-generator)
+
 This project aims not to provide a silver bullet for converting your Gradle or Maven build configurations to Bazel but
 instead it aims to help automate the most annoying 90+% of work required to support dependencies in your BUILD files 
 for Kotlin/Java project. This Generator only relies on parsing your source code for figuring out package-level dependencies.
