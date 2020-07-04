@@ -1,8 +1,14 @@
-# Bazel BUILD files generator for Kotlin
+# Bazel BUILD files generator for JVM with package-level granularity
+
+[![Build Status](https://api.cirrus-ci.com/github/cirruslabs/bazel-project-generator.svg)](https://cirrus-ci.com/github/cirruslabs/bazel-project-generator)
 
 This project aims not to provide a silver bullet for converting your Gradle or Maven build configurations to Bazel but
-instead it aims to help automate 99% of work required to support dependencies in your BUILD files for Kotlin/Java project.
-This Generator only relies on parsing your source code for figuring out package-level dependencies.
+instead it aims to help automate the most annoying 90+% of work required to support dependencies in your BUILD files 
+for Kotlin/Java project. This Generator only relies on parsing your source code for figuring out package-level dependencies.
+
+# Example Projects Using the Generator
+
+* [fkorotkov/microservices](https://github.com/fkorotkov/microservices) - GRPC Kotlin micro services in a monorepo
 
 # How to use
 
@@ -10,14 +16,10 @@ First of all a `WORKSPACE` file need to be created to define `rules_jvm_external
 (you can take a look at [`WORKSPACE`](https://github.com/cirruslabs/bazel-project-generator/blob/master/WORKSPACE)
 file of this project).
 
-# Example Projects Using the Generator
-
-* [fkorotkov/microservices](https://github.com/fkorotkov/microservices) - GRPC Kotlin micro services in a monorepo
-
 ## External Maven Dependencies
 
-All external maven dependencies should be defined in `dependencies_jvm.json` file in the root of your repository.
-Generator will translate `dependencies_jvm.json` to `maven_install` in `3rdparty/jvm/workspace.bzl` which you'll need
+All external maven dependencies should be defined in `dependencies.json` file in the root of your repository.
+Generator will translate `dependencies.json` to `maven_install` in `3rdparty/jvm/workspace.bzl` which you'll need
 to load in your `WORKSPACE` file:
 
 ```python
@@ -25,7 +27,7 @@ load("//3rdparty/jvm:workspace.bzl", "jvm_dependencies")
 jvm_dependencies()
 ```
 
-`dependencies_jvm.json` file format is pretty simple:
+`dependencies.json` file format is pretty simple and can be generated for your Gradle project via [this plugin](https://github.com/fkorotkov/gradle-libraries-plugin):
 
 ```json
 {
@@ -60,7 +62,7 @@ bazel-bin/cmd --workspace-root ~/worspace/my-project --source-content-root modul
 
 * `--source-content-root` - path to root of your project where [`WORKSPACE` file from above](#how-to-use) was created.
 * `--source-content-root` - relative or absolute paths to folder where Generator will look for source roots (Generator expects Maven project structure ).
-* `--dependencies` - path to a JSON file with dependencies (defaults to `dependencies_jvm.json`). 
+* `--dependencies` - path to a JSON file with dependencies (defaults to `dependencies.json`). 
 
 # Questions
 
