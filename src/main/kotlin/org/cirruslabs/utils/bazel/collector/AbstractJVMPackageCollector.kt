@@ -90,7 +90,7 @@ abstract class AbstractJVMPackageCollector<T : BazelTarget>(
     return JvmFile(path, packageFqName, importedPackagesFiltered.toSortedSet())
   }
 
-  fun generateBuildFiles(registry: PackageRegistry) {
+  fun generateBuildFiles(registry: PackageRegistry, dryRun: Boolean) {
     for (packageInfo in registry.packages) {
       val buildFilePath = try {
         @Suppress("UNCHECKED_CAST")
@@ -98,11 +98,14 @@ abstract class AbstractJVMPackageCollector<T : BazelTarget>(
       } catch (ex: ClassCastException) {
         continue
       }
+
+      println("Generating content of $buildFilePath")
+      val buildFileContent = generateBuildFileContent(registry, packageInfo)
+      if (dryRun) continue
+
       if (Files.exists(buildFilePath) && !Files.deleteIfExists(buildFilePath)) {
         System.err.println("Failed to delete $buildFilePath")
       } else {
-        println("Generating $buildFilePath")
-        val buildFileContent = generateBuildFileContent(registry, packageInfo)
         Files.writeString(
           buildFilePath,
           buildFileContent,

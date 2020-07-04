@@ -60,17 +60,22 @@ class ProtoPackageCollector(private val workspaceRoot: Path, val implementationL
     return ProtoFile(path, packageFqName)
   }
 
-  fun generateBuildFiles(registry: PackageRegistry) {
+  fun generateBuildFiles(registry: PackageRegistry, dryRun: Boolean) {
     for (packageInfo in registry.packages) {
       val protoInfo = packageInfo as? KotlinProtoInfo ?: continue
       val buildFilePath = workspaceRoot.resolve(protoInfo.targetPath).resolve("BUILD.bazel")
+
+      println("Generating content of $buildFilePath")
+      val buildFileContent = protoInfo.generateBuildFile(registry)
+      if (dryRun) continue
+
       if (Files.exists(buildFilePath) && !Files.deleteIfExists(buildFilePath)) {
         System.err.println("Failed to delete $buildFilePath")
       } else {
         println("Generating $buildFilePath")
         Files.writeString(
           buildFilePath,
-          protoInfo.generateBuildFile(registry),
+          buildFileContent,
           StandardOpenOption.CREATE_NEW
         )
       }

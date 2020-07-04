@@ -37,7 +37,10 @@ class DependenciesCollector(private val deps: DependenciesDefinition, caching: B
     }
   }
 
-  fun generateWorkspaceFile(workspaceRoot: Path) {
+  fun generateWorkspaceFiles(workspaceRoot: Path, dryRun: Boolean) {
+    val workspaceFileContent = workspaceFileContent()
+    if (dryRun) return
+
     val buildFilePath = workspaceRoot.resolve("3rdparty/jvm").resolve("BUILD.bazel")
     if (!Files.exists(buildFilePath)) {
       Files.createDirectories(buildFilePath.parent)
@@ -50,7 +53,7 @@ class DependenciesCollector(private val deps: DependenciesDefinition, caching: B
       println("Generating $workspaceFilePath")
       Files.writeString(
         workspaceFilePath,
-        workspaceFileContent(),
+        workspaceFileContent,
         StandardOpenOption.CREATE_NEW
       )
     }

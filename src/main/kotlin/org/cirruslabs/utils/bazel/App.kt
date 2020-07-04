@@ -54,40 +54,28 @@ class App : CliktCommand() {
       }
 
     dependenciesCollector?.collectPackageInfos(registry)
-    if (!dryRun) {
-      dependenciesCollector?.generateWorkspaceFile(workspaceRoot)
-    }
+    dependenciesCollector?.generateWorkspaceFiles(workspaceRoot, dryRun)
 
     val javaPackageCollector = JavaPackageCollector(workspaceRoot.toAbsolutePath())
     javaPackageCollector.collectPackageInfoInSourceRoot(registry, roots)
-    if (!dryRun) {
-      javaPackageCollector.generateBuildFiles(registry)
-    }
+    javaPackageCollector.generateBuildFiles(registry, dryRun)
 
     val registryForJavaTests = registry.copy()
     val javaTestPackageCollector = JavaTestPackageCollector(workspaceRoot.toAbsolutePath())
     javaTestPackageCollector.collectPackageInfoInSourceRoot(registryForJavaTests, roots)
-    if (!dryRun) {
-      javaTestPackageCollector.generateBuildFiles(registryForJavaTests)
-    }
+    javaTestPackageCollector.generateBuildFiles(registryForJavaTests, dryRun)
 
     val protoPackageCollector = ProtoPackageCollector(workspaceRoot.toAbsolutePath(), protoTargetLanguage.toLowerCase())
     protoPackageCollector.collectPackageInfoInSourceRoot(registry, roots)
-    if (!dryRun) {
-      protoPackageCollector.generateBuildFiles(registry)
-    }
+    protoPackageCollector.generateBuildFiles(registry, dryRun)
 
     val kotlinPackageCollector = KotlinPackageCollector(workspaceRoot.toAbsolutePath())
     kotlinPackageCollector.collectPackageInfoInSourceRoot(registry, roots)
-    if (!dryRun) {
-      kotlinPackageCollector.generateBuildFiles(registry)
-    }
+    kotlinPackageCollector.generateBuildFiles(registry, dryRun)
 
     val kotlinTestPackageCollector = KotlinTestPackageCollector(workspaceRoot.toAbsolutePath())
     kotlinTestPackageCollector.collectPackageInfoInSourceRoot(registry, roots)
-    if (!dryRun) {
-      kotlinTestPackageCollector.generateBuildFiles(registry)
-    }
+    kotlinTestPackageCollector.generateBuildFiles(registry, dryRun)
   }
 
   private fun findSourceRootsForGradleProject(): List<Path> {
