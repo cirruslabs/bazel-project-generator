@@ -12,9 +12,9 @@ for Kotlin/Java project. This Generator only relies on parsing your source code 
 
 # How to use
 
-First of all a `WORKSPACE` file need to be created to define `rules_jvm_external` and `rules_kotlin` of your choice
+First of all a `WORKSPACE` file is needed to be created to define `rules_jvm_external` and `rules_kotlin` of your choice
 (you can take a look at [`WORKSPACE`](https://github.com/cirruslabs/bazel-project-generator/blob/master/WORKSPACE)
-file of this project).
+file of this project or any other example projects from above).
 
 ## External Maven Dependencies
 
@@ -57,6 +57,8 @@ Now you can try to generate BUILD files for your project:
 ```bash
 bazel-bin/cmd --workspace-root ~/worspace/my-project --source-content-root module1/src --source-content-root module2/src
 ```
+
+**Note:** if none of the `--source-content-root` are passed the generator will try to find recursively all `src` folders inside `--workspace-root`.
 
 ### Generation options
 
