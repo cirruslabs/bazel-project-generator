@@ -63,6 +63,8 @@ bazel-bin/cmd --workspace-root ~/worspace/my-project --source-content-root modul
 * `--source-content-root` - path to root of your project where [`WORKSPACE` file from above](#how-to-use) was created.
 * `--source-content-root` - relative or absolute paths to folder where Generator will look for source roots (Generator expects Maven project structure ).
 * `--dependencies` - path to a JSON file with dependencies (defaults to `dependencies.json`). 
+* `--caching` - Downloaded jar files will be cached in `.cache/maven` folder.
+* `--dry-run` - Run everything without generating BUILD files.
 
 # Questions
 
