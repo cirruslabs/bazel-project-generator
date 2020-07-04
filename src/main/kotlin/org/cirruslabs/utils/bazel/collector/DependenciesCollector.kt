@@ -11,15 +11,16 @@ import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 
 @KtorExperimentalAPI
-class DependenciesCollector(private val deps: DependenciesDefinition) {
-  constructor(dependenciesFile: Path) : this(
+class DependenciesCollector(private val deps: DependenciesDefinition, caching: Boolean = false) {
+  constructor(dependenciesFile: Path, caching: Boolean) : this(
     Gson().fromJson(
       Files.readString(dependenciesFile),
       DependenciesDefinition::class.java
-    )
+    ),
+    caching = caching
   )
 
-  private val infoFetcher = MavenInfoFetcher(deps.repositories)
+  private val infoFetcher = MavenInfoFetcher(deps.repositories, caching)
 
   suspend fun collectPackageInfos(registry: PackageRegistry) {
     deps.libraries.forEach { library ->

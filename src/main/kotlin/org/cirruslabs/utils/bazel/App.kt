@@ -29,6 +29,9 @@ class App : CliktCommand() {
   private val dryRun: Boolean by option(help = "Option to disable files generation")
     .flag(default = false)
 
+  private val caching: Boolean by option(help = "Caching")
+    .flag(default = false)
+
   private val protoTargetLanguage: String by option(help = "Either Kotlin or Java to use either grpc-kotlin or grpc-java only")
     .default("Kotlin")
 
@@ -36,10 +39,10 @@ class App : CliktCommand() {
     val registry = PackageRegistry()
     val dependenciesCollector = when {
       dependencies != null -> DependenciesCollector(
-        dependencies ?: workspaceRoot.resolve("dependencies_jvm.json")
+        dependencies ?: workspaceRoot.resolve("dependencies_jvm.json"), caching
       )
-      Files.exists(workspaceRoot.resolve("dependencies_jvm.json")) -> DependenciesCollector(workspaceRoot.resolve("dependencies_jvm.json"))
-      Files.exists(workspaceRoot.resolve("dependencies.json")) -> DependenciesCollector(workspaceRoot.resolve("dependencies.json"))
+      Files.exists(workspaceRoot.resolve("dependencies_jvm.json")) -> DependenciesCollector(workspaceRoot.resolve("dependencies_jvm.json"), caching)
+      Files.exists(workspaceRoot.resolve("dependencies.json")) -> DependenciesCollector(workspaceRoot.resolve("dependencies.json"), caching)
       else -> null
     }
 

@@ -11,10 +11,12 @@ import io.ktor.utils.io.copyAndClose
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
 import java.util.jar.JarFile
 
 @KtorExperimentalAPI
-class MavenInfoFetcher(private val repositories: List<String>) {
+class MavenInfoFetcher(private val repositories: List<String>, val caching: Boolean = false) {
   private val httpClient: HttpClient = HttpClient(CIO) {
     followRedirects = true
     expectSuccess = false // to handle 404s
@@ -22,13 +24,27 @@ class MavenInfoFetcher(private val repositories: List<String>) {
 
   suspend fun findPackagesInMavenArtifact(group: String, name: String, version: String): List<String> {
     for (repository in repositories) {
-      val jarURL = "$repository/${group.replace('.', '/')}/$name/$version/$name-$version.jar"
+      val jarName = "$name-$version.jar"
+      val jarURL = "$repository/${group.replace('.', '/')}/$name/$version/$jarName"
       val response = httpClient.get<HttpResponse>(jarURL)
       if (!response.status.isSuccess()) continue
       val file = withContext(Dispatchers.IO) {
-        File.createTempFile("ktor", "http-client").also {
-          it.deleteOnExit()
-          response.content.copyAndClose(it.writeChannel())
+        if (caching) {
+          val cachedJarPath = Path.of( ".cache", "maven", jarName)
+          val cachedFile = File(cachedJarPath.toUri())
+          if (!cachedFile.exists()) {
+            Files.createDirectories(cachedJarPath.parent)
+            response.content.copyAndClose(cachedFile.writeChannel())
+            println("Cached $jarName in ${cachedJarPath.parent.toAbsolutePath()}!")
+          } else {
+            println("Found $jarName in caches!")
+          }
+          cachedFile
+        } else {
+          File.createTempFile("ktor", "http-client").also {
+            it.deleteOnExit()
+            response.content.copyAndClose(it.writeChannel())
+          }
         }
       }
       return extractTopLevelPackages(file)
