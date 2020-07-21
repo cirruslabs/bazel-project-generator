@@ -22,6 +22,8 @@ All external maven dependencies should be pined and defined in `maven_install.js
 Please refer to [`rules_jvm_external` documentation](https://github.com/bazelbuild/rules_jvm_external#pinning-artifacts-and-integration-with-bazels-downloader)
 for details.
 
+The generator will use `maven_install.json` in order to infer packages that each of the external dependencies contain.
+
 ## BUILD files generation
 
 Please clone and build this project:
