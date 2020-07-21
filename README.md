@@ -18,31 +18,9 @@ file of this project).
 
 ## External Maven Dependencies
 
-All external maven dependencies should be defined in `dependencies.json` file in the root of your repository.
-Generator will translate `dependencies.json` to `maven_install` in `3rdparty/jvm/workspace.bzl` which you'll need
-to load in your `WORKSPACE` file:
-
-```python
-load("//3rdparty/jvm:workspace.bzl", "jvm_dependencies")
-jvm_dependencies()
-```
-
-`dependencies.json` file format is pretty simple and can be generated for your Gradle project via [this plugin](https://github.com/fkorotkov/gradle-libraries-plugin):
-
-```json
-{
-  "repositories": [
-    "https://repo1.maven.org/maven2"
-  ],
-  "libraries": [
-    {
-      "group": "com.google.code.gson",
-      "name": "gson",
-      "version": "2.8.6"
-    }
-  ]
-}
-```
+All external maven dependencies should be pined and defined in `maven_install.json` file in the root of your repository.
+Please refer to [`rules_jvm_external` documentation](https://github.com/bazelbuild/rules_jvm_external#pinning-artifacts-and-integration-with-bazels-downloader)
+for details.
 
 ## BUILD files generation
 

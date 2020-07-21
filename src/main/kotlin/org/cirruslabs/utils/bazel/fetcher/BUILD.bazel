@@ -8,9 +8,14 @@ kt_jvm_library(
   deps = [
     "@maven//:io_ktor_ktor_client_cio",
     "@maven//:io_ktor_ktor_client_core",
+    "@maven//:io_ktor_ktor_client_core_jvm",
     "@maven//:io_ktor_ktor_http",
+    "@maven//:io_ktor_ktor_http_jvm",
     "@maven//:io_ktor_ktor_io",
+    "@maven//:io_ktor_ktor_io_jvm",
     "@maven//:io_ktor_ktor_utils",
+    "@maven//:io_ktor_ktor_utils_jvm",
     "@maven//:org_jetbrains_kotlinx_kotlinx_coroutines_core",
+    "@maven//:org_jetbrains_kotlinx_kotlinx_coroutines_core_common",
   ],
 )

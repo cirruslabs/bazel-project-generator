@@ -16,40 +16,36 @@ import java.nio.file.Path
 import java.util.jar.JarFile
 
 @KtorExperimentalAPI
-class MavenInfoFetcher(private val repositories: List<String>, val caching: Boolean = false) {
+class MavenInfoFetcher(val caching: Boolean = false) {
   private val httpClient: HttpClient = HttpClient(CIO) {
     followRedirects = true
     expectSuccess = false // to handle 404s
   }
 
-  suspend fun findPackagesInMavenArtifact(group: String, name: String, version: String): List<String> {
-    for (repository in repositories) {
-      val jarName = "$name-$version.jar"
-      val jarURL = "$repository/${group.replace('.', '/')}/$name/$version/$jarName"
-      val response = httpClient.get<HttpResponse>(jarURL)
-      if (!response.status.isSuccess()) continue
-      val file = withContext(Dispatchers.IO) {
-        if (caching) {
-          val cachedJarPath = Path.of( ".cache", "maven", jarName)
-          val cachedFile = File(cachedJarPath.toUri())
-          if (!cachedFile.exists()) {
-            Files.createDirectories(cachedJarPath.parent)
-            response.content.copyAndClose(cachedFile.writeChannel())
-            println("Cached $jarName in ${cachedJarPath.parent.toAbsolutePath()}!")
-          } else {
-            println("Found $jarName in caches!")
-          }
-          cachedFile
+  suspend fun findPackagesInMavenArtifact(jarURL: String): List<String> {
+    val jarName = jarURL.substringAfterLast('/')
+    val response = httpClient.get<HttpResponse>(jarURL)
+    if (!response.status.isSuccess()) return emptyList()
+    val file = withContext(Dispatchers.IO) {
+      if (caching) {
+        val cachedJarPath = Path.of(".cache", "maven", jarName)
+        val cachedFile = File(cachedJarPath.toUri())
+        if (!cachedFile.exists()) {
+          Files.createDirectories(cachedJarPath.parent)
+          response.content.copyAndClose(cachedFile.writeChannel())
+          println("Cached $jarName in ${cachedJarPath.parent.toAbsolutePath()}!")
         } else {
-          File.createTempFile("ktor", "http-client").also {
-            it.deleteOnExit()
-            response.content.copyAndClose(it.writeChannel())
-          }
+          println("Found $jarName in caches!")
+        }
+        cachedFile
+      } else {
+        File.createTempFile("ktor", "http-client").also {
+          it.deleteOnExit()
+          response.content.copyAndClose(it.writeChannel())
         }
       }
-      return extractTopLevelPackages(file)
     }
-    return emptyList()
+    return extractTopLevelPackages(file)
   }
 
   private suspend fun extractTopLevelPackages(file: File): List<String> = withContext(Dispatchers.IO) {
