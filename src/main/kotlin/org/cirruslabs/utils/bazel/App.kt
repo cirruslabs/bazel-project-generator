@@ -19,7 +19,7 @@ class App : CliktCommand() {
     .path(canBeFile = false, canBeDir = true)
     .default(Paths.get(""))
 
-  private val dependencies: Path? by option(help = "JSON file with Maven dependencies")
+  private val dependencies: Path? by option(help = "JSON file with Maven dependencies (in maven_install format)")
     .path(canBeFile = true, canBeDir = false)
 
   private val sourceContentRoot: List<Path> by option(help = "Source root to look for targets (can be relative to --workspace-root)")
@@ -38,11 +38,8 @@ class App : CliktCommand() {
   override fun run() = runBlocking {
     val registry = PackageRegistry()
     val dependenciesCollector = when {
-      dependencies != null -> DependenciesCollector(
-        dependencies ?: workspaceRoot.resolve("dependencies_jvm.json"), caching
-      )
-      Files.exists(workspaceRoot.resolve("dependencies_jvm.json")) -> DependenciesCollector(workspaceRoot.resolve("dependencies_jvm.json"), caching)
-      Files.exists(workspaceRoot.resolve("dependencies.json")) -> DependenciesCollector(workspaceRoot.resolve("dependencies.json"), caching)
+      dependencies != null -> DependenciesCollector(dependencies ?: workspaceRoot.resolve("maven_install.json"), caching)
+      Files.exists(workspaceRoot.resolve("maven_install.json")) -> DependenciesCollector(workspaceRoot.resolve("maven_install.json"), caching)
       else -> null
     }
 
@@ -54,7 +51,6 @@ class App : CliktCommand() {
       }
 
     dependenciesCollector?.collectPackageInfos(registry)
-    dependenciesCollector?.generateWorkspaceFiles(workspaceRoot, dryRun)
 
     val javaPackageCollector = JavaPackageCollector(workspaceRoot.toAbsolutePath())
     javaPackageCollector.collectPackageInfoInSourceRoot(registry, roots)
@@ -90,6 +86,7 @@ class App : CliktCommand() {
   }
 }
 
+@KtorExperimentalAPI
 fun main(args: Array<String>) {
   App().main(args)
 }
