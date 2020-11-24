@@ -77,17 +77,33 @@ abstract class AbstractJVMPackageCollector<T : BazelTarget>(
           .removeSuffix(";")
       }
       if (line.startsWith("import")) {
-        val importFq = line.substringAfter("import")
-          .trimStart()
-          .substringBefore(' ')
-          .removeSuffix(";")
-        importedPackages.add(importFq.substringBeforeLast('.'))
+        importedPackages.add(parseImportStatement(line).substringBeforeLast('.'))
       }
     }
     val importedPackagesFiltered = importedPackages
       .filter { !it.startsWith("java.") }
       .filter { !defaultKotlinPackageImports.contains(it.substringBeforeLast('.')) }
     return JvmFile(path, packageFqName, importedPackagesFiltered.toSortedSet())
+  }
+
+  /*
+   * Import statements can come in several forms including, this function
+   * returns the following:
+   * import com.fully.qualified.package.*; -> "com.fully.qualified.package.*"
+   * import static com.fully.qualified.package.Type; -> "com.fully.qualified.package.Type"
+   */
+  private fun parseImportStatement(line: String): String {
+    val parts = line.split(" ")
+
+    val fqn = if (parts.size == 3) {
+      if (parts[1] == "static") parts[2] else error("Invalid import statement: $line")
+    } else if (parts.size == 2) {
+      parts[1]
+    } else {
+      error("Invalid import statement: $line")
+    }
+
+    return fqn.removeSuffix(";")
   }
 
   fun generateBuildFiles(registry: PackageRegistry, dryRun: Boolean) {
